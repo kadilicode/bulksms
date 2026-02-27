@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenoAPI Tester - Sensible</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { color: #333; text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        textarea { height: 100px; resize: none; }
+        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #0056b3; }
+        #response { margin-top: 20px; padding: 15px; border-radius: 4px; display: none; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loader { text-align: center; display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ZenoAPI SMS Test</h2>
+    
+    <div class="form-group">
+        <label>Sender ID</label>
+        <input type="text" id="sender_id" value="Sensible" readonly>
+    </div>
+
+    <div class="form-group">
+        <label>Namba za Simu (Tenganisha kwa koma)</label>
+        <input type="text" id="contacts" placeholder="Mfano: 255652449389, 2557XXXXXXXX">
+    </div>
+
+    <div class="form-group">
+        <label>Ujumbe (Message)</label>
+        <textarea id="message" placeholder="Andika ujumbe wako hapa..."></textarea>
+    </div>
+
+    <button onclick="sendSMS()" id="sendBtn">Tuma SMS Sasa</button>
+
+    <div class="loader" id="loader">Inatuma... Tafadhali subiri...</div>
+    <div id="response"></div>
+</div>
+
+<script>
+    async function sendSMS() {
+        const btn = document.getElementById('sendBtn');
+        const loader = document.getElementById('loader');
+        const respDiv = document.getElementById('response');
+        
+        const apiKey = "ePazPhjKvrIqbPYVGg2AOl1Yq1F27iFTJ_gcKC2DU28sAmaAWNXKnbCkmyuqhbyV7wDokTG4mOlOTFPog29fVQ";
+        const senderId = document.getElementById('sender_id').value;
+        const contacts = document.getElementById('contacts').value;
+        const message = document.getElementById('message').value;
+
+        if(!contacts || !message) {
+            alert("Tafadhali jaza namba na ujumbe!");
+            return;
+        }
+
+        // Ficha button na onyesha loader
+        btn.style.display = 'none';
+        loader.style.display = 'block';
+        respDiv.style.display = 'none';
+
+        const rawData = {
+            "sender_id": senderId,
+            "message_type": "text",
+            "message": message,
+            "contacts": contacts
+        };
+
+        try {
+            const response = await fetch("https://zenoapi.com/api/sms/v1/send/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": apiKey
+                },
+                body: JSON.stringify(rawData)
+            });
+
+            const result = await response.json();
+
+            respDiv.style.display = 'block';
+            if (response.ok) {
+                respDiv.className = 'success';
+                respDiv.innerText = "Hongera! SMS imetuma.\n\n" + JSON.stringify(result, null, 2);
+            } else {
+                respDiv.className = 'error';
+                respDiv.innerText = "Kuna tatizo:\n" + JSON.stringify(result, null, 2);
+            }
+        } catch (error) {
+            respDiv.style.display = 'block';
+            respDiv.className = 'error';
+            respDiv.innerText = "Error: " + error.message;
+        } finally {
+            btn.style.display = 'block';
+            loader.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+  </html>
 
